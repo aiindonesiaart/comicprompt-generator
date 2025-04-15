@@ -289,10 +289,8 @@
                 if (caption) prompt += `- Caption: "${caption}"\n`;
             }
             
-            prompt += `\nSPECIAL INSTRUCTIONS:\n`;
-            prompt += `- Maintain consistent character designs throughout\n`;
-            prompt += `- Use appropriate panel layouts for the ${style} style\n`;
-            prompt += `- Ensure good flow between panels for storytelling\n`;
+            prompt += `- Maintain consistent character designs throughout. Use appropriate panel layouts for the ${style} style. Ensure good flow between panels for storytelling. Make sure all texts read clearly\n`;
+    
             
             document.getElementById('promptResult').textContent = prompt;
         }
