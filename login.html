@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Panel Prompt Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --comic-red: #ff6b6b;
+            --comic-blue: #4dabf7;
+            --comic-yellow: #ffd43b;
+            --comic-orange: #ff922b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .prompt-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 25px;
+            margin: 30px auto;
+            border: 3px solid var(--comic-blue);
+            display: none;
+        }
+        
+        .panel-option {
+            background-color: var(--comic-yellow);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px dashed #343a40;
+        }
+        
+        .panel-header {
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-number {
+            background-color: var(--comic-red);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        .btn-comic {
+            background-color: var(--comic-red);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        
+        .btn-comic:hover {
+            background-color: #ff5252;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        }
+        
+        .prompt-result {
+            background-color: #f0f8ff;
+            border-left: 5px solid var(--comic-blue);
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            min-height: 120px;
+            white-space: pre-wrap;
+        }
+        
+        .comic-header {
+            background-color: var(--comic-orange);
+            padding: 15px 0;
+            border-bottom: 3px solid #343a40;
+        }
+        
+        .comic-footer {
+            background-color: var(--comic-blue);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-top: 3px solid #343a40;
+        }
+        
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            border-radius: 50px;
+            padding: 8px 20px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        #error-message {
+            display: none;
+        }
+        
+        .session-info {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="comic-header">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="https://aiindonesaiart.github.io">
+                        <span class="d-none d-md-inline align-middle">Comic Prompt Generator</span>
+                    </a>
+                    <div id="logoutBtnContainer" style="display: none;">
+                        <button id="logoutBtn" class="btn btn-outline-danger">Logout</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Login Form (Initially Visible) -->
+    <div class="container" id="loginContainer">
+        <div class="login-container">
+            <h2 class="text-center mb-4">Login Required</h2>
+            <form id="loginForm">
+                <div id="error-message" class="alert alert-danger"></div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content (Initially Hidden) -->
+    <div class="container" id="content" style="display: none;">
+        <div class="prompt-card">
+            <div class="session-info">
+                Logged in as: <span id="userEmail"></span> | 
+                Session expires: <span id="expiryDate"></span>
+            </div>
+            
+            <h2 class="text-center">✏️ Comic Panel Prompt Generator</h2>
+            <p class="text-center mb-4">Create detailed comic prompts with panel-by-panel descriptions!</p>
+            
+            <form id="promptForm">
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <label for="panelCount" class="form-label">Number of Panels</label>
+                        <select class="form-select" id="panelCount" onchange="updatePanels()">
+                            <option value="1">Single Panel</option>
+                            <option value="2">2 Panels</option>
+                            <option value="3" selected>3 Panels</option>
+                            <option value="4">4 Panels</option>
+                            <option value="6">6 Panels</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="style" class="form-label">Art Style</label>
+                        <select class="form-select" id="style">
+                            <option value="comic book">Comic Book</option>
+                            <option value="manga">Manga</option>
+                            <option value="cartoon">Cartoon</option>
+                            <option value="graphic novel">Graphic Novel</option>
+							<option value="web comic">Web Comic</option>
+							<option value="caricature">Caricature</option>
+							<option value="black and white">Black And White</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="theme" class="form-label">Theme/Genre</label>
+                        <select class="form-select" id="theme">
+                            <option value="slice of life">Slice Of Life</option>
+							<option value="superhero">Superhero</option>
+                            <option value="fantasy">Fantasy</option>
+                            <option value="sci-fi">Sci-Fi</option>
+                            <option value="humor">Humor</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="characters" class="form-label">Main Characters</label>
+                    <input type="text" class="form-control" id="characters" placeholder="e.g., teenage superhero, alien sidekick">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="setting" class="form-label">Overall Setting</label>
+                    <input type="text" class="form-control" id="setting" placeholder="e.g., futuristic metropolis, medieval kingdom">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="overview" class="form-label">Story Overview</label>
+                    <textarea class="form-control" id="overview" rows="2" placeholder="Brief description of what happens in the comic"></textarea>
+                </div>
+                
+                <h4 class="mt-5 mb-3">Panel Details</h4>
+                
+                <ul class="nav nav-tabs" id="panelTabs" role="tablist">
+                    <!-- Tabs will be generated by JavaScript -->
+                </ul>
+                
+                <div class="tab-content" id="panelContainer">
+                    <!-- Panel content will be generated by JavaScript -->
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="button" class="btn btn-comic btn-lg" onclick="generatePrompt()">
+                        🎨 Generate Comic Prompt
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-5">
+                <label for="promptResult" class="form-label">Your Comic Prompt:</label>
+                <div class="prompt-result mb-3" id="promptResult">
+                    Your detailed comic prompt will appear here...
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-outline-primary me-2" onclick="copyPrompt()">
+                        📋 Copy Prompt
+                    </button>
+                    <button class="btn btn-success" onclick="shareOnWhatsApp()">
+                        💬 Share via WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="comic-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-md-start mb-3 mb-md-0">
+                    <h5>Comic Prompt Generator</h5>
+                    <p>Create amazing comic ideas with ease!</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="https://wa.me/6285773009666" class="whatsapp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Contact Support
+                    </a>
+                    <p class="mt-3">&copy; 2023 Comic Prompt Generator</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginContainer = document.getElementById('loginContainer');
+            const content = document.getElementById('content');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutBtnContainer = document.getElementById('logoutBtnContainer');
+            const errorMessage = document.getElementById('error-message');
+            const expiryDateElement = document.getElementById('expiryDate');
+            const userEmailElement = document.getElementById('userEmail');
+            
+            // Define valid users with different session durations
+            const validUsers = [
+                { email: 'bandarlaundry@gmail.com', password: 'password123', validityPeriod: 7 },
+                { email: 'bandardeterjen@gmail.com', password: 'password456', validityPeriod: 14 },
+                { email: 'aiindonesiaart@gmail.com', password: 'password789', validityPeriod: 30 }
+            ];
+            
+            // Check for existing valid session
+            const storedData = localStorage.getItem('comicLoginData');
+            if (storedData) {
+                const { email, expiry } = JSON.parse(storedData);
+                const now = new Date().getTime();
+                
+                if (now < expiry) {
+                    // Valid session exists
+                    showContent(email, expiry);
+                } else {
+                    // Session expired
+                    localStorage.removeItem('comicLoginData');
+                }
+            }
+            
+            // Handle login form submission
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                // Check credentials
+                const user = validUsers.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    // Successful login
+                    errorMessage.style.display = 'none';
+                    
+                    // Calculate expiration time
+                    const now = new Date().getTime();
+                    const expiry = now + (user.validityPeriod * 24 * 60 * 60 * 1000);
+                    
+                    // Store session data
+                    const loginData = { email, expiry };
+                    localStorage.setItem('comicLoginData', JSON.stringify(loginData));
+                    
+                    // Show content
+                    showContent(email, expiry);
+                } else {
+                    // Failed login
+                    errorMessage.textContent = 'Invalid email or password';
+                    errorMessage.style.display = 'block';
+                }
+            });
+            
+            // Handle logout
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('comicLoginData');
+                hideContent();
+            });
+            
+            // Show main content after login
+            function showContent(email, expiry) {
+                loginContainer.style.display = 'none';
+                content.style.display = 'block';
+                logoutBtnContainer.style.display = 'block';
+                document.querySelector('.prompt-card').style.display = 'block';
+                
+                // Display user info
+                userEmailElement.textContent = email;
+                expiryDateElement.textContent = new Date(expiry).toLocaleString();
+                
+                // Initialize panel system
+                updatePanels();
+            }
+            
+            // Hide content and show login form
+            function hideContent() {
+                loginContainer.style.display = 'block';
+                content.style.display = 'none';
+                logoutBtnContainer.style.display = 'none';
+                loginForm.reset();
+                errorMessage.style.display = 'none';
+            }
+            
+            // Prevent right-click
+            document.addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+            });
+        });
+        
+        // Panel management functions
+        function updatePanels() {
+            const panelCount = parseInt(document.getElementById('panelCount').value);
+            const tabsContainer = document.getElementById('panelTabs');
+            const contentContainer = document.getElementById('panelContainer');
+            
+            tabsContainer.innerHTML = '';
+            contentContainer.innerHTML = '';
+            
+            for (let i = 1; i <= panelCount; i++) {
+                // Create tab
+                const tab = document.createElement('li');
+                tab.className = 'nav-item';
+                tab.innerHTML = `
+                    <a class="nav-link ${i === 1 ? 'active' : ''}" id="panel-${i}-tab" data-bs-toggle="tab" 
+                       href="#panel-${i}" role="tab" aria-controls="panel-${i}">
+                        Panel ${i}
+                    </a>
+                `;
+                tabsContainer.appendChild(tab);
+                
+                // Create content
+                const panelContent = document.createElement('div');
+                panelContent.className = `tab-pane fade ${i === 1 ? 'show active' : ''}`;
+                panelContent.id = `panel-${i}`;
+                panelContent.role = 'tabpanel';
+                panelContent.innerHTML = `
+                    <div class="panel-option">
+                        <div class="panel-header">
+                            <div class="panel-number">${i}</div>
+                            <span>Panel ${i} Details</span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-action" class="form-label">Action/Description</label>
+                            <textarea class="form-control" id="panel-${i}-action" rows="2" 
+                                      placeholder="What's happening in this panel"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-bubble1" class="form-label">Speech Bubble 1</label>
+                            <input type="text" class="form-control" id="panel-${i}-bubble1" 
+                                   placeholder="Character dialogue">
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-bubble2" class="form-label">Speech Bubble 2</label>
+                            <input type="text" class="form-control" id="panel-${i}-bubble2" 
+                                   placeholder="Additional dialogue or sound effect">
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-caption" class="form-label">Panel Caption</label>
+                            <input type="text" class="form-control" id="panel-${i}-caption" 
+                                   placeholder="Narration text">
+                        </div>
+                    </div>
+                `;
+                contentContainer.appendChild(panelContent);
+            }
+        }
+        
+         function generatePrompt() {
+            const style = document.getElementById('style').value;
+            const theme = document.getElementById('theme').value;
+            const characters = document.getElementById('characters').value;
+            const setting = document.getElementById('setting').value;
+            const overview = document.getElementById('overview').value;
+            const panelCount = parseInt(document.getElementById('panelCount').value);
+            
+            let prompt = `Create a ${panelCount}-panel ${style} style comic in the ${theme} genre.\n\n`;
+            prompt += `MAIN CHARACTERS: ${characters || 'Unspecified characters'}\n`;
+            prompt += `SETTING: ${setting || 'Unspecified setting'}\n`;
+            prompt += `STORY OVERVIEW: ${overview || 'No overview provided'}\n\n`;
+            prompt += `PANEL DETAILS:\n`;
+            
+            for (let i = 1; i <= panelCount; i++) {
+                const action = document.getElementById(`panel-${i}-action`).value;
+                const bubble1 = document.getElementById(`panel-${i}-bubble1`).value;
+                const bubble2 = document.getElementById(`panel-${i}-bubble2`).value;
+                const caption = document.getElementById(`panel-${i}-caption`).value;
+                
+                prompt += `\nPANEL ${i}:\n`;
+                prompt += `- Action: ${action || 'No action specified'}\n`;
+                if (bubble1) prompt += `- Dialogue: "${bubble1}"\n`;
+                if (bubble2) prompt += `- Additional text: "${bubble2}"\n`;
+                if (caption) prompt += `- Caption: "${caption}"\n`;
+            }
+            
+            prompt += `- Maintain consistent character designs throughout. Use appropriate panel layouts for the ${style} style. Ensure good flow between panels for storytelling. Make sure all texts read clearly\n`;
+    
+            
+            document.getElementById('promptResult').textContent = prompt;
+        }
+        
+        
+        function copyPrompt() {
+            const promptText = document.getElementById('promptResult').textContent;
+            navigator.clipboard.writeText(promptText);
+            alert('Prompt copied to clipboard!');
+        }
+        
+        function shareOnWhatsApp() {
+            const promptText = document.getElementById('promptResult').textContent;
+            const encodedText = encodeURIComponent("Check out this comic prompt:\n\n" + promptText);
+            window.open(`https://wa.me/?text=${encodedText}`);
+        }
+    </script>
+</body>
+</html>
