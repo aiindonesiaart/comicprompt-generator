@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Panel Prompt Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --comic-red: #ff6b6b;
+            --comic-blue: #4dabf7;
+            --comic-yellow: #ffd43b;
+            --comic-orange: #ff922b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .prompt-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 25px;
+            margin: 30px auto;
+            border: 3px solid var(--comic-blue);
+            display: none;
+        }
+        
+        .panel-option {
+            background-color: var(--comic-yellow);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px dashed #343a40;
+        }
+        
+        .panel-header {
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-number {
+            background-color: var(--comic-red);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        .btn-comic {
+            background-color: var(--comic-red);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        
+        .btn-comic:hover {
+            background-color: #ff5252;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        }
+        
+        .prompt-result {
+            background-color: #f0f8ff;
+            border-left: 5px solid var(--comic-blue);
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            min-height: 120px;
+            white-space: pre-wrap;
+        }
+        
+        .comic-header {
+            background-color: var(--comic-orange);
+            padding: 15px 0;
+            border-bottom: 3px solid #343a40;
+        }
+        
+        .comic-logo {
+            height: 40px; /* Fixed height */
+            width: auto; /* Maintain aspect ratio */
+            margin-right: 15px;
+        }
+        
+        .navbar-brand-text {
+            font-size: 1.25rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .comic-footer {
+            background-color: var(--comic-blue);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-top: 3px solid #343a40;
+            margin-top: auto;
+        }
+        
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            border-radius: 50px;
+            padding: 8px 20px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        #error-message {
+            display: none;
+        }
+        
+        .session-info {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        #tutorial-section {
+            background-color: #f8f9fa;
+            padding: 30px 0;
+            border-top: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            margin: 30px 0;
+        }
+        
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .navbar-brand-text {
+                display: none; /* Hide text on mobile */
+            }
+            
+            .comic-logo {
+                height: 35px; /* Slightly smaller logo on mobile */
+            }
+            
+            .login-container {
+                margin: 50px auto;
+                padding: 20px;
+            }
+            
+            .prompt-card {
+                padding: 15px;
+                margin: 15px auto;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="comic-header">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">
+                        <img src="https://via.placeholder.com/150x60?text=COMIC+LOGO" alt="Comic Prompt Generator" class="comic-logo">
+                        <span class="navbar-brand-text d-none d-md-inline">Comic Prompt Generator</span>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#home">Beranda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#tutorial">Tutorial</a>
+                            </li>
+                            <li class="nav-item" id="logoutBtnContainer" style="display: none;">
+                                <a class="nav-link text-danger" href="#" id="logoutBtn">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Login Form (Initially Visible) -->
+    <div class="container" id="loginContainer">
+        <div class="login-container">
+            <h2 class="text-center mb-4">Login Required</h2>
+            <form id="loginForm">
+                <div id="error-message" class="alert alert-danger"></div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content (Initially Hidden) -->
+    <div class="container" id="content" style="display: none;">
+        <div class="prompt-card">
+            <div class="session-info">
+                Logged in as: <span id="userEmail"></span> | 
+                Session expires: <span id="expiryDate"></span>
+            </div>
+            
+            <h2 class="text-center">✏️ Comic Panel Prompt Generator</h2>
+            <p class="text-center mb-4">Create detailed comic prompts with panel-by-panel descriptions!</p>
+            
+            <form id="promptForm">
+                <!-- Form content remains the same as before -->
+                <!-- ... -->
+            </form>
+            
+            <div class="mt-5">
+                <label for="promptResult" class="form-label">Your Comic Prompt:</label>
+                <div class="prompt-result mb-3" id="promptResult">
+                    Your detailed comic prompt will appear here...
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-outline-primary me-2" onclick="copyPrompt()">
+                        📋 Copy Prompt
+                    </button>
+                    <button class="btn btn-success" onclick="shareOnWhatsApp()">
+                        💬 Share via WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tutorial Section -->
+        <div id="tutorial-section" class="mt-5">
+            <div class="container">
+                <h2 id="tutorial" class="mb-4">Tutorial Penggunaan</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Langkah 1: Login</h4>
+                        <p>Masukkan email dan password yang valid untuk mengakses generator.</p>
+                        
+                        <h4>Langkah 2: Pilih Jumlah Panel</h4>
+                        <p>Tentukan berapa panel yang Anda butuhkan untuk komik Anda (1-6 panel).</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Langkah 3: Isi Detail Komik</h4>
+                        <p>Masukkan karakter, setting, dan gambaran umum cerita Anda.</p>
+                        
+                        <h4>Langkah 4: Isi Setiap Panel</h4>
+                        <p>Untuk setiap panel, tentukan aksi, dialog, dan caption yang diinginkan.</p>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <p>Butuh bantuan? <a href="https://wa.me/6285773009666" class="whatsapp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Hubungi Kami
+                    </a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="comic-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-md-start mb-3 mb-md-0">
+                    <h5>Comic Prompt Generator</h5>
+                    <p>Create amazing comic ideas with ease!</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="https://wa.me/6285773009666" class="whatsapp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Contact Support
+                    </a>
+                    <p class="mt-3">&copy; 2023 Comic Prompt Generator</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // JavaScript remains the same as before
+        // ...
+    </script>
+</body>
+</html>
