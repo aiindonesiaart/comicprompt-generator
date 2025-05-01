@@ -314,8 +314,207 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // JavaScript remains the same as before
-        // ...
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginContainer = document.getElementById('loginContainer');
+            const content = document.getElementById('content');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutBtnContainer = document.getElementById('logoutBtnContainer');
+            const errorMessage = document.getElementById('error-message');
+            const expiryDateElement = document.getElementById('expiryDate');
+            const userEmailElement = document.getElementById('userEmail');
+            
+            // Define valid users with different session durations
+            const validUsers = [
+                { email: 'bandarlaundry@gmail.com', password: 'password123', validityPeriod: 7 },
+                { email: 'bandardeterjen@gmail.com', password: 'password456', validityPeriod: 14 },
+                { email: 'aiindonesiaart@gmail.com', password: 'password789', validityPeriod: 30 }
+            ];
+            
+            // Check for existing valid session
+            const storedData = localStorage.getItem('comicLoginData');
+            if (storedData) {
+                const { email, expiry } = JSON.parse(storedData);
+                const now = new Date().getTime();
+                
+                if (now < expiry) {
+                    // Valid session exists
+                    showContent(email, expiry);
+                } else {
+                    // Session expired
+                    localStorage.removeItem('comicLoginData');
+                }
+            }
+            
+            // Handle login form submission
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                // Check credentials
+                const user = validUsers.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    // Successful login
+                    errorMessage.style.display = 'none';
+                    
+                    // Calculate expiration time
+                    const now = new Date().getTime();
+                    const expiry = now + (user.validityPeriod * 24 * 60 * 60 * 1000);
+                    
+                    // Store session data
+                    const loginData = { email, expiry };
+                    localStorage.setItem('comicLoginData', JSON.stringify(loginData));
+                    
+                    // Show content
+                    showContent(email, expiry);
+                } else {
+                    // Failed login
+                    errorMessage.textContent = 'Invalid email or password';
+                    errorMessage.style.display = 'block';
+                }
+            });
+            
+            // Handle logout
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('comicLoginData');
+                hideContent();
+            });
+            
+            // Show main content after login
+            function showContent(email, expiry) {
+                loginContainer.style.display = 'none';
+                content.style.display = 'block';
+                logoutBtnContainer.style.display = 'block';
+                document.querySelector('.prompt-card').style.display = 'block';
+                
+                // Display user info
+                userEmailElement.textContent = email;
+                expiryDateElement.textContent = new Date(expiry).toLocaleString();
+                
+                // Initialize panel system
+                updatePanels();
+            }
+            
+            // Hide content and show login form
+            function hideContent() {
+                loginContainer.style.display = 'block';
+                content.style.display = 'none';
+                logoutBtnContainer.style.display = 'none';
+                loginForm.reset();
+                errorMessage.style.display = 'none';
+            }
+            
+            // Prevent right-click
+            document.addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+            });
+        });
+        
+        // Panel management functions
+        function updatePanels() {
+            const panelCount = parseInt(document.getElementById('panelCount').value);
+            const tabsContainer = document.getElementById('panelTabs');
+            const contentContainer = document.getElementById('panelContainer');
+            
+            tabsContainer.innerHTML = '';
+            contentContainer.innerHTML = '';
+            
+            for (let i = 1; i <= panelCount; i++) {
+                // Create tab
+                const tab = document.createElement('li');
+                tab.className = 'nav-item';
+                tab.innerHTML = `
+                    <a class="nav-link ${i === 1 ? 'active' : ''}" id="panel-${i}-tab" data-bs-toggle="tab" 
+                       href="#panel-${i}" role="tab" aria-controls="panel-${i}">
+                        Panel ${i}
+                    </a>
+                `;
+                tabsContainer.appendChild(tab);
+                
+                // Create content
+                const panelContent = document.createElement('div');
+                panelContent.className = `tab-pane fade ${i === 1 ? 'show active' : ''}`;
+                panelContent.id = `panel-${i}`;
+                panelContent.role = 'tabpanel';
+                panelContent.innerHTML = `
+                    <div class="panel-option">
+                        <div class="panel-header">
+                            <div class="panel-number">${i}</div>
+                            <span>Panel ${i} Details</span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-action" class="form-label">Action/Description</label>
+                            <textarea class="form-control" id="panel-${i}-action" rows="2" 
+                                      placeholder="What's happening in this panel"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-bubble1" class="form-label">Speech Bubble 1</label>
+                            <input type="text" class="form-control" id="panel-${i}-bubble1" 
+                                   placeholder="Character dialogue">
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-bubble2" class="form-label">Speech Bubble 2</label>
+                            <input type="text" class="form-control" id="panel-${i}-bubble2" 
+                                   placeholder="Additional dialogue or sound effect">
+                        </div>
+                        <div class="mb-3">
+                            <label for="panel-${i}-caption" class="form-label">Panel Caption</label>
+                            <input type="text" class="form-control" id="panel-${i}-caption" 
+                                   placeholder="Narration text">
+                        </div>
+                    </div>
+                `;
+                contentContainer.appendChild(panelContent);
+            }
+        }
+        
+         function generatePrompt() {
+            const style = document.getElementById('style').value;
+            const theme = document.getElementById('theme').value;
+            const characters = document.getElementById('characters').value;
+            const setting = document.getElementById('setting').value;
+            const overview = document.getElementById('overview').value;
+            const panelCount = parseInt(document.getElementById('panelCount').value);
+            
+            let prompt = `Create a ${panelCount}-panel ${style} style comic in the ${theme} genre.\n\n`;
+            prompt += `MAIN CHARACTERS: ${characters || 'Unspecified characters'}\n`;
+            prompt += `SETTING: ${setting || 'Unspecified setting'}\n`;
+            prompt += `STORY OVERVIEW: ${overview || 'No overview provided'}\n\n`;
+            prompt += `PANEL DETAILS:\n`;
+            
+            for (let i = 1; i <= panelCount; i++) {
+                const action = document.getElementById(`panel-${i}-action`).value;
+                const bubble1 = document.getElementById(`panel-${i}-bubble1`).value;
+                const bubble2 = document.getElementById(`panel-${i}-bubble2`).value;
+                const caption = document.getElementById(`panel-${i}-caption`).value;
+                
+                prompt += `\nPANEL ${i}:\n`;
+                prompt += `- Action: ${action || 'No action specified'}\n`;
+                if (bubble1) prompt += `- Dialogue: "${bubble1}"\n`;
+                if (bubble2) prompt += `- Additional text: "${bubble2}"\n`;
+                if (caption) prompt += `- Caption: "${caption}"\n`;
+            }
+            
+            prompt += `- Maintain consistent character designs throughout. Use appropriate panel layouts for the ${style} style. Ensure good flow between panels for storytelling. Make sure all texts read clearly\n`;
+    
+            
+            document.getElementById('promptResult').textContent = prompt;
+        }
+        
+        
+        function copyPrompt() {
+            const promptText = document.getElementById('promptResult').textContent;
+            navigator.clipboard.writeText(promptText);
+            alert('Prompt copied to clipboard!');
+        }
+        
+        function shareOnWhatsApp() {
+            const promptText = document.getElementById('promptResult').textContent;
+            const encodedText = encodeURIComponent("Check out this comic prompt:\n\n" + promptText);
+            window.open(`https://wa.me/?text=${encodedText}`);
+        }
     </script>
 </body>
 </html>
